@@ -6,24 +6,24 @@ using UnityStandardAssets.CrossPlatformInput;
 
 public class Player : MonoBehaviour
 {
-    [Tooltip("in ms^-1")]
-    [SerializeField] float xSpeed = 4f;
+    [Header("General")]
+    [Tooltip("in ms^-1")][SerializeField] float xSpeed = 4f;
+    [Tooltip("in m")][SerializeField] float xRange = 5f;
+    [Tooltip("in ms^-1")][SerializeField] float ySpeed = 4f;
+    [Tooltip("in m")][SerializeField] float yRange = 5f;
 
-    [Tooltip("in m")]
-    [SerializeField] float xRange = 5f;
-
-    [Tooltip("in ms^-1")]
-    [SerializeField] float ySpeed = 4f;
-
-    [Tooltip("in m")]
-    [SerializeField] float yRange = 5f;
-
+    [Header("Screen-position based")]
     [SerializeField] float positionPitchFactor = 0.5f;
-    [SerializeField] float controlPitchFactor = 30f;
     [SerializeField] float positionyawFactor = 0.5f;
+
+    [Header("Control-throw based")]
+    [SerializeField] float controlPitchFactor = 30f;
     [SerializeField] float controlrollFactor = 30f;
 
+    [SerializeField] GameObject[] guns; 
+
     float xThrow, yThrow;
+    bool isControlEnabled = true;
 
     // Start is called before the first frame update
     void Start()
@@ -34,8 +34,39 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ProcessTranslation();
-        ProcessRotation();
+        if (isControlEnabled)
+        {
+            ProcessTranslation();
+            ProcessRotation();
+            ProcessShooting();
+        }
+    }
+
+    private void ProcessShooting()
+    {
+        if(CrossPlatformInputManager.GetButton("Fire"))
+        {
+            ActivateGuns();
+        } else
+        {
+            DeactivateGuns();
+        }
+    }
+
+    private void ActivateGuns()
+    {
+        foreach (GameObject gun in guns)
+        {
+            gun.SetActive(true);
+        }
+    }
+
+    private void DeactivateGuns()
+    {
+        foreach (GameObject gun in guns)
+        {
+            gun.SetActive(false);
+        }
     }
 
     private void ProcessRotation()
@@ -62,5 +93,11 @@ public class Player : MonoBehaviour
 
         transform.localPosition = new Vector3(xPos, transform.localPosition.y, transform.localPosition.z);
         transform.localPosition = new Vector3(transform.localPosition.x, yPos, transform.localPosition.z);
+    }
+
+    private void StopMotion()
+    {
+        print("hit something");
+        isControlEnabled = !isControlEnabled;
     }
 }
