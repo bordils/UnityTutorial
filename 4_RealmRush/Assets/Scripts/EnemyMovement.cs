@@ -6,27 +6,31 @@ using UnityEngine;
 public class EnemyMovement : MonoBehaviour
 {
     [SerializeField] float dwellTime = 1f;
-    [SerializeField] List<Waypoint> Path;
+    [SerializeField] ParticleSystem goalParticle;
+   
 
-
-    // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(PrintAllWaypoints());
+        PathFinder pathFinder = FindObjectOfType<PathFinder>();
+        var path = pathFinder.GetPath();
+        StartCoroutine(FollowPath(path));
     }
 
-    IEnumerator PrintAllWaypoints()
+    IEnumerator FollowPath(List<Waypoint> path)
     {
-        foreach(Waypoint block in Path)
+        foreach (Waypoint block in path)
         {
             transform.position = block.transform.position;
             yield return new WaitForSeconds(dwellTime);
         }
+        selfDesetroy();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void selfDesetroy()
     {
-        
+        var vfx = Instantiate(goalParticle, transform.position, Quaternion.identity);
+        vfx.Play();
+        Destroy(vfx.gameObject, vfx.main.duration);
+        Destroy(gameObject);
     }
 }
